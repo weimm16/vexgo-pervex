@@ -1,0 +1,10 @@
+{
+  "id": "vexgo-pervex",
+  "name": "VexGo Pervex Theme",
+  "author": "xiaozuo-left",
+  "version": "1.0.0",
+  "description": "基于Vexgo的现代化博客前端主题",
+  "preview": "preview.jpg",
+  "adminLoginUrl": "http://localhost:5173/admin/login",
+  "themeKey": "vexgoTheme"
+}
