@@ -25,6 +25,22 @@ export const deleteArticle = (id) => {
   return axiosInstance.delete(`/posts/${id}`);
 };
 
+// 上传封面/内容图片
+export const uploadFile = (file, onProgress) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  return axiosInstance.post('/upload/file', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+    onUploadProgress: (progressEvent) => {
+      if (onProgress && progressEvent.total) {
+        onProgress(Math.round((progressEvent.loaded * 100) / progressEvent.total));
+      }
+    },
+  });
+};
+
 // 登录（获取JWT）
 export const login = (data) => {
   return axiosInstance.post('/auth/login', data);

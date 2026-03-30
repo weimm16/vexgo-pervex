@@ -1,5 +1,6 @@
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from '../context/AuthContext';
+import ErrorBoundary from '../components/ErrorBoundary';
 import FrontLayout from '../components/layout/FrontLayout';
 import AdminLayout from '../components/layout/AdminLayout';
 
@@ -48,9 +49,9 @@ const router = createBrowserRouter([
     ),
     children: [
       { path: '', element: <Navigate to="/admin/articles" replace /> },
-      { path: 'articles', element: <ArticleList /> },
-      { path: 'articles/edit/:id?', element: <ArticleEdit /> }, // 新增（无id）/编辑（有id）
-      { path: 'profile', element: <Profile /> },
+      { path: 'articles', element: <ErrorBoundary><ArticleList /></ErrorBoundary> },
+      { path: 'articles/edit/:id?', element: <ErrorBoundary><ArticleEdit /></ErrorBoundary> },
+      { path: 'profile', element: <ErrorBoundary><Profile /></ErrorBoundary> },
     ],
   },
   // 404

@@ -37,3 +37,36 @@ body {
 ::-webkit-scrollbar-track {
   @apply bg-transparent;
 }
+
+html[data-theme='vexgo-default'] {
+  --bg-color: #f9fafb;
+  --text-color: #111827;
+  --surface: #ffffff;
+  --border: #e5e7eb;
+  --color-primary-rgb: 0 0 0;
+}
+
+html[data-theme='vexgo-pervex'] {
+  --bg-color: #f9fafb;
+  --text-color: #111827;
+  --surface: #ffffff;
+  --border: #e5e7eb;
+  --color-primary-rgb: 0 0 0;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+header, footer, .p-6, .bg-white, .bg-gray-50, .bg-gray-900, .bg-dark\/80 {
+  background-color: var(--surface) !important;
+}
+
+.border-gray-200, .border-gray-800, .border-gray-300, .border-gray-700 {
+  border-color: var(--border) !important;
+}
+
+.text-title {
+  color: var(--color-title) !important;
+}

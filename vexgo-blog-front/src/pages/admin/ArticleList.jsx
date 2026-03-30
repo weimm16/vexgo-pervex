@@ -9,16 +9,33 @@ import formatDate from '../../utils/formatDate';
 const ArticleList = () => {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(null); // 记录删除中的文章ID
 
   // 获取文章列表
   const fetchArticles = async () => {
     try {
       setLoading(true);
-      const res = await getArticleList({ page: 1, size: 100 }); // 个人博客默认加载全部
-      setArticles(res.data.list);
+      setError(null);
+      const res = await getArticleList({ page: 1, size: 100 });
+      
+      // 确保数据结构正确
+      let articleList = [];
+      if (res.data?.posts && Array.isArray(res.data.posts)) {
+        articleList = res.data.posts;
+      } else if (res.data?.list && Array.isArray(res.data.list)) {
+        articleList = res.data.list;
+      } else if (Array.isArray(res.data)) {
+        articleList = res.data;
+      }
+      
+      console.log('获取文章列表成功:', articleList);
+      setArticles(articleList || []);
     } catch (error) {
       console.error('获取文章失败：', error);
+      console.error('错误响应：', error.response?.data);
+      setError(error.response?.data?.message || error.message || '获取文章列表失败');
+      setArticles([]); // 确保设置为空数组，绝不是 undefined
     } finally {
       setLoading(false);
     }
@@ -53,9 +70,11 @@ const ArticleList = () => {
       {/* 头部操作栏 */}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-primary">文章管理</h2>
-        <Button as={Link} to="/admin/articles/edit" variant="primary">
-          新增文章
-        </Button>
+        <Link to="/admin/articles/edit" className="no-underline">
+          <Button variant="primary">
+            新增文章
+          </Button>
+        </Link>
       </div>
 
       {/* 文章列表 */}
@@ -63,14 +82,17 @@ const ArticleList = () => {
         <div className="flex justify-center py-12">
           <Loading />
         </div>
-      ) : articles.length === 0 ? (
-        <div className="bg-white dark:bg-dark/80 rounded-lg p-8 text-center">
-          <p className="text-gray-500 mb-4">暂无文章，点击「新增文章」开始创作吧 ✍️</p>
-          <Button as={Link} to="/admin/articles/edit" variant="primary">
-            立即创作
-          </Button>
+      ) : error ? (
+        <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-6 text-center">
+          <p className="text-red-600 dark:text-red-300">获取文章失败：{error}</p>
+          <button 
+            onClick={fetchArticles}
+            className="mt-4 px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 transition"
+          >
+            重试
+          </button>
         </div>
-      ) : (
+      ) : Array.isArray(articles) && articles.length > 0 ? (
         <div className="bg-white dark:bg-dark/80 rounded-lg shadow-md overflow-hidden">
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-dark/90">
@@ -86,28 +108,25 @@ const ArticleList = () => {
                   key={article.id}
                   className="hover:bg-gray-50 dark:hover:bg-dark/70 transition-colors"
                 >
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <Link 
-                      to={`/article/${article.id}`}
-                      target="_blank"
-                      className="text-primary hover:text-primary/80 font-medium"
-                    >
-                      {article.title}
-                    </Link>
+                  <td className="px-6 py-4">
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{article.title}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">作者: {article.author?.username || '未知'}</p>
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                    {formatDate(article.createTime)}
+                    {formatDate(article.createdAt || article.createTime)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <div className="flex space-x-2">
-                      <Button 
-                        as={Link} 
-                        to={`/admin/articles/edit/${article.id}`}
-                        variant="outline" 
-                        size="sm"
-                      >
-                        编辑
-                      </Button>
+                      <Link to={`/admin/articles/edit/${article.id}`} className="no-underline">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                        >
+                          编辑
+                        </Button>
+                      </Link>
                       <Button 
                         variant="danger" 
                         size="sm"
@@ -122,6 +141,15 @@ const ArticleList = () => {
               ))}
             </tbody>
           </table>
+        </div>
+      ) : (
+        <div className="bg-white dark:bg-dark/80 rounded-lg p-8 text-center">
+          <p className="text-gray-500 mb-4">暂无文章，点击「立即创作」开始创作吧 ✍️</p>
+          <Link to="/admin/articles/edit" className="no-underline">
+            <Button variant="primary">
+              立即创作
+            </Button>
+          </Link>
         </div>
       )}
     </motion.div>

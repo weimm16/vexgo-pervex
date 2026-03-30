@@ -7,14 +7,16 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#3b82f6',
+        primary: 'rgb(var(--color-primary-rgb) / <alpha-value>)',
         secondary: '#64748b',
         light: '#f8fafc',
         dark: '#1e293b',
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/typography'),
+  ],
   corePlugins: {
     // Ensure that background color utilities are enabled
     backgroundOpacity: true,

@@ -8,6 +8,18 @@ const AdminLayout = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
 
+  // 双击计数器
+  let clickCount = 0;
+  const handleTitleClick = () => {
+    clickCount++;
+    if (clickCount === 2) {
+      navigate('/');
+      clickCount = 0;
+    } else {
+      setTimeout(() => clickCount = 0, 500); // 重置计数器
+    }
+  };
+
   // 退出登录
   const handleLogout = () => {
     logout();
@@ -24,7 +36,12 @@ const AdminLayout = () => {
       {/* 侧边栏 */}
       <aside className="w-64 bg-white dark:bg-dark/80 border-r border-gray-200 dark:border-gray-800 h-screen sticky top-0">
         <div className="p-6 border-b border-gray-200 dark:border-gray-800">
-          <h2 className="text-xl font-bold text-primary">博客管理后台</h2>
+          <h2
+            className="text-3xl font-bold text-primary cursor-pointer"
+            onClick={handleTitleClick}
+          >
+            博客管理后台
+          </h2>
         </div>
         <nav className="p-4">
           <ul className="space-y-2">

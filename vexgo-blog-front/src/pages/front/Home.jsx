@@ -8,13 +8,45 @@ import Button from '../../components/ui/Button';
 const Home = () => {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [title, setTitle] = useState('我的个人博客');
+  const [subtitle, setSubtitle] = useState('记录生活，分享技术，保持热爱，奔赴山海');
+  const [titleColor, setTitleColor] = useState('#000000');
+  const [titleSize, setTitleSize] = useState('48');
+
+  useEffect(() => {
+    const storedTitle = window.localStorage.getItem('vexgoTitle') || '我的个人博客';
+    const storedSubtitle = window.localStorage.getItem('vexgoSubtitle') || '记录生活，分享技术，保持热爱，奔赴山海';
+    const storedTitleColor = window.localStorage.getItem('vexgoTitleColor') || '#000000';
+    const storedTitleSize = window.localStorage.getItem('vexgoTitleSize') || '48';
+    setTitle(storedTitle);
+    setSubtitle(storedSubtitle);
+    setTitleColor(storedTitleColor);
+    setTitleSize(storedTitleSize);
+
+    const handleStorageChange = (event) => {
+      if (event.key === 'vexgoTitle') {
+        setTitle(event.newValue || '我的个人博客');
+      } else if (event.key === 'vexgoSubtitle') {
+        setSubtitle(event.newValue || '记录生活，分享技术，保持热爱，奔赴山海');
+      } else if (event.key === 'vexgoTitleColor') {
+        setTitleColor(event.newValue || '#000000');
+      } else if (event.key === 'vexgoTitleSize') {
+        setTitleSize(event.newValue || '48');
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   // 获取文章列表
   const fetchArticles = async (currentPage) => {
     try {
       setLoading(true);
+      setError(null);
       const res = await getArticleList({ page: currentPage, size: 8 });
       
       // 确保数据结构正确，避免 undefined 错误
@@ -30,6 +62,7 @@ const Home = () => {
       setHasMore(currentPage * 8 < total);
     } catch (error) {
       console.error('获取文章失败：', error);
+      setError(error.message || '获取文章失败');
       // 确保 articles 始终是数组
       setArticles([]);
     } finally {
@@ -62,13 +95,20 @@ const Home = () => {
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
       >
-        <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
-          我的个人博客
+        <h1 className="font-bold mb-4" style={{ color: titleColor, fontSize: `${titleSize}px` }}>
+          {title}
         </h1>
         <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-          记录生活，分享技术，保持热爱，奔赴山海
+          {subtitle}
         </p>
       </motion.div>
+
+      {/* 错误提示 */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-100 dark:bg-red-900/20 border border-red-300 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300">
+          加载失败: {error}
+        </div>
+      )}
 
       {/* 文章列表 */}
       {loading && page === 1 ? (
@@ -78,13 +118,20 @@ const Home = () => {
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.isArray(articles) && articles.map(article => (
-              <Card key={article.id} article={article} />
-            ))}
+            {Array.isArray(articles) && articles.length > 0 ? (
+              articles.map(article => (
+                <Card key={article.id} article={article} />
+              ))
+            ) : (
+              <div className="col-span-full mt-8 text-center text-gray-500 py-12">
+                <p className="text-lg">暂无文章</p>
+                <p className="text-sm mt-2">快去后台发布吧 ✍️</p>
+              </div>
+            )}
           </div>
 
           {/* 加载更多按钮 */}
-          {hasMore && (
+          {hasMore && articles.length > 0 && (
             <div className="mt-8 text-center">
               <Button 
                 variant="outline" 
@@ -101,13 +148,6 @@ const Home = () => {
           {!hasMore && articles.length > 0 && (
             <div className="mt-8 text-center text-gray-500">
               没有更多文章了 📚
-            </div>
-          )}
-
-          {/* 无文章 */}
-          {articles.length === 0 && !loading && (
-            <div className="mt-8 text-center text-gray-500">
-              暂无文章，快去后台发布吧 ✍️
             </div>
           )}
         </>
